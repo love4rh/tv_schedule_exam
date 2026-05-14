@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:mysql://yonsei-prac.ctzdbubeyzr5.ap-northeast-2.rds.amazonaws.com:8306/epg?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&allowLoadLocalInfile=true
+    username: yonsei
+    password: ${EPG_DB_PW}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # driver-class-name: com.mysql.jdbc.Driver
+  
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache-period: 0
+        
+server:
+  port: 8282
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    com.example.tvschedule: DEBUG
+    org.springframework.jdbc: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%21.21thread] --- %cyan([%32.32logger{39}]): [%16X{messageId}] %msg%n"
