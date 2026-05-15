@@ -38,7 +38,7 @@ public class ProgramRepository {
         return jdbcTemplate.query(sql, programRowMapper);
     }
 
-    public Optional<Program> findById(Long programId) {
+    public Optional<Program> findById(String programId) {
         String sql = "SELECT program_id, title, genre, summary FROM Program WHERE program_id = ?";
         List<Program> programs = jdbcTemplate.query(sql, programRowMapper, programId);
         return programs.isEmpty() ? Optional.empty() : Optional.of(programs.get(0));
@@ -54,23 +54,16 @@ public class ProgramRepository {
     }
 
     private Program insert(Program program) {
-        String sql = "INSERT INTO programs (title, genre, summary) VALUES (?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, program.getProgramName());
-            ps.setString(2, program.getGenre());
-            ps.setString(3, program.getDescription());
-            return ps;
-        }, keyHolder);
-        
-        program.setProgramId(keyHolder.getKey().toString());
+        String programId = "T" + String.format("%09d", new java.util.Random().nextInt(1_000_000_000));
+        program.setProgramId(programId);
+
+        String sql = "INSERT INTO Program (program_id, title, genre, summary) VALUES (?, ?, ?, ?)";
+        jdbcTemplate.update(sql, program.getProgramId(), program.getProgramName(), program.getGenre(), program.getDescription());
         return program;
     }
 
     private void update(Program program) {
-        String sql = "UPDATE programs SET title = ?, genre = ?, summary = ? WHERE program_id = ?";
+        String sql = "UPDATE Program SET title = ?, genre = ?, summary = ? WHERE program_id = ?";
         jdbcTemplate.update(sql, program.getProgramName(), program.getGenre(), program.getDescription(), program.getProgramId());
     }
 

@@ -121,24 +121,18 @@ public class ScheduleRepository {
     }
 
     private Schedule insert(Schedule schedule) {
-        String sql = "INSERT INTO schedules (channel_id, program_id, start_time, end_time) VALUES (?, ?, ?, ?)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        java.util.Random random = new java.util.Random();
+        String scheduleId = String.format("%04d", random.nextInt(10000)) + "T" + String.format("%09d", random.nextInt(1_000_000_000));
+        schedule.setScheduleId(scheduleId);
 
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, schedule.getChannelId());
-            ps.setString(2, schedule.getProgramId());
-            ps.setTimestamp(3, java.sql.Timestamp.valueOf(schedule.getStartTime()));
-            ps.setTimestamp(4, java.sql.Timestamp.valueOf(schedule.getEndTime()));
-            return ps;
-        }, keyHolder);
-        
-        schedule.setScheduleId(keyHolder.getKey().toString());
+        String sql = "INSERT INTO Schedule (schedule_id, channel_id, program_id, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
+        jdbcTemplate.update(sql, schedule.getScheduleId(), schedule.getChannelId(), schedule.getProgramId(),
+                java.sql.Timestamp.valueOf(schedule.getStartTime()), java.sql.Timestamp.valueOf(schedule.getEndTime()));
         return schedule;
     }
 
     private void update(Schedule schedule) {
-        String sql = "UPDATE schedules SET channel_id = ?, program_id = ?, start_time = ?, end_time = ? WHERE schedule_id = ?";
+        String sql = "UPDATE Schedule SET channel_id = ?, program_id = ?, start_time = ?, end_time = ? WHERE schedule_id = ?";
         jdbcTemplate.update(sql, schedule.getChannelId(), schedule.getProgramId(), 
                            schedule.getStartTime(), schedule.getEndTime(), schedule.getScheduleId());
     }

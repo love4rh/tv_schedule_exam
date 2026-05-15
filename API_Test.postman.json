@@ -131,7 +131,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/channels/KBS1/schedules?date={{date}}",
+              "raw": "{{baseUrl}}/api/v1/channels/9/schedules?date={{date}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -352,7 +352,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/schedules/9814C730174457",
+              "raw": "{{baseUrl}}/api/v1/schedules/9814C730304206",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -654,7 +654,7 @@
     },
     {
       "key": "date",
-      "value": "2026-05-12"
+      "value": "2026-05-18"
     },
     {
       "key": "scheduleId",
