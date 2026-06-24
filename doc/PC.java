@@ -25,7 +25,7 @@ public class ProgramController {
     }
 
     @GetMapping("/{programId}")
-    public ResponseEntity<ApiResponse<Program>> getProgramById(@PathVariable Long programId) {
+    public ResponseEntity<ApiResponse<Program>> getProgramById(@PathVariable String programId) {
         Optional<Program> program = programRepository.findById(programId);
         if (program.isPresent()) {
             return ResponseEntity.ok(ApiResponse.success(program.get(), "프로그램 조회 성공"));
