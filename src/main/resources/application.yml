@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:mysql://yonsei-prac.ctzdbubeyzr5.ap-northeast-2.rds.amazonaws.com:8306/epg?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&allowLoadLocalInfile=true
-    username: yonsei
+    url: jdbc:mysql://10.157.74.18:3309/epg?allowLoadLocalInfile=true
+    username: study
     password: ${EPG_DB_PW}
     driver-class-name: com.mysql.cj.jdbc.Driver
     # driver-class-name: com.mysql.jdbc.Driver
