@@ -73,4 +73,21 @@ public class ChannelRepository {
         String sql = "SELECT channel_id, channel_name, channel_group FROM Channel WHERE channel_group = ?";
         return jdbcTemplate.query(sql, channelRowMapper, channelGroup);
     }
+
+    public List<Channel> search(String keyword) {
+        String sql = "SELECT channel_id, channel_name, channel_group FROM Channel " +
+                    "WHERE channel_id LIKE ? OR channel_name LIKE ? " +
+                    "ORDER BY channel_id";
+        String pattern = "%" + keyword + "%";
+        return jdbcTemplate.query(sql, channelRowMapper, pattern, pattern);
+    }
+
+    // 채널 ID, 채널명, 그룹명 중 하나라도 검색어를 포함하는 채널을 조회
+    public List<Channel> searchByNameOrGroup(String keyword) {
+        String sql = "SELECT channel_id, channel_name, channel_group FROM Channel " +
+                    "WHERE channel_id LIKE ? OR channel_name LIKE ? OR channel_group LIKE ? " +
+                    "ORDER BY channel_id";
+        String pattern = "%" + keyword + "%";
+        return jdbcTemplate.query(sql, channelRowMapper, pattern, pattern, pattern);
+    }
 }

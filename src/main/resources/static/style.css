@@ -1,3 +1,30 @@
+/* =========================================================
+   Monokai 테마 팔레트
+   ========================================================= */
+:root {
+    --mk-bg:        #272822; /* 기본 배경 */
+    --mk-bg-alt:    #2f302a; /* 패널/카드 배경 */
+    --mk-bg-soft:   #3a3b32; /* 입력/호버 배경 */
+    --mk-border:    #49483e; /* 경계선 */
+    --mk-fg:        #f8f8f2; /* 기본 텍스트 */
+    --mk-fg-dim:    #a6a69b; /* 보조 텍스트 */
+    --mk-comment:   #75715e; /* 흐린 텍스트 */
+    --mk-green:     #a6e22e; /* 연두 (주 액센트) */
+    --mk-pink:      #f92672; /* 핑크 */
+    --mk-cyan:      #66d9ef; /* 시안 */
+    --mk-orange:    #fd971f; /* 주황 */
+    --mk-yellow:    #e6db74; /* 노랑 */
+    --mk-purple:    #ae81ff; /* 보라 */
+
+    /* 차분한 버튼 색상 (채도를 낮춘 톤) */
+    --btn-primary:       #5a6a4a; /* 차분한 올리브-그린 */
+    --btn-primary-hover: #68794f;
+    --btn-add:           #4a6670; /* 차분한 틸-블루 */
+    --btn-add-hover:     #577884;
+    --btn-danger:        #8a4a52; /* 차분한 더스티-레드 */
+    --btn-danger-hover:  #9c545d;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,8 +32,9 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Menlo', 'Segoe UI', monospace, sans-serif;
+    background: var(--mk-bg);
+    color: var(--mk-fg);
     min-height: 100vh;
     padding: 20px;
 }
@@ -14,47 +42,86 @@ body {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    background: var(--mk-bg-alt);
+    border: 1px solid var(--mk-border);
+    border-radius: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(45deg, #4CAF50, #45a049);
-    color: white;
-    padding: 30px;
+    background: var(--mk-bg);
+    color: var(--mk-green);
+    padding: 28px 30px;
     text-align: center;
+    border-bottom: 1px solid var(--mk-border);
 }
 
 header h1 {
-    font-size: 2.5em;
+    font-size: 2.2em;
     margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
-.tabs {
+/* =========================================================
+   레이아웃 (사이드바 + 본문)
+   ========================================================= */
+.layout {
     display: flex;
-    background: #f1f1f1;
-    border-bottom: 1px solid #ddd;
+    align-items: stretch;
+    min-height: 520px;
 }
 
-.tab-btn {
-    flex: 1;
-    padding: 15px 20px;
+.sidebar {
+    flex: 0 0 220px;
+    width: 220px;
+    background: var(--mk-bg);
+    border-right: 1px solid var(--mk-border);
+    padding: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 13px 20px;
     border: none;
-    background: #f1f1f1;
+    border-left: 3px solid transparent;
+    background: transparent;
+    color: var(--mk-fg-dim);
     cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    text-align: left;
+    transition: all 0.15s;
+}
+
+.nav-btn:hover {
+    background: var(--mk-bg-soft);
+    color: var(--mk-fg);
+}
+
+.nav-btn.active {
+    background: var(--mk-bg-alt);
+    color: var(--mk-green);
+    border-left-color: var(--mk-green);
+    font-weight: 600;
+}
+
+.nav-icon {
     font-size: 16px;
-    transition: all 0.3s;
+    width: 20px;
+    text-align: center;
 }
 
-.tab-btn:hover {
-    background: #e1e1e1;
-}
-
-.tab-btn.active {
-    background: #4CAF50;
-    color: white;
+.main-content {
+    flex: 1;
+    min-width: 0; /* flex 자식 overflow 방지 */
 }
 
 .tab-content {
@@ -67,74 +134,125 @@ header h1 {
 }
 
 .tab-content h2 {
-    color: #333;
+    color: var(--mk-cyan);
     margin-bottom: 20px;
-    font-size: 1.8em;
+    font-size: 1.6em;
+    font-weight: 600;
 }
 
+/* =========================================================
+   입력 / 버튼
+   ========================================================= */
 .input-group {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
 .input-group label {
-    font-weight: bold;
-    color: #555;
+    font-weight: 600;
+    color: var(--mk-orange);
 }
 
-.input-group input {
-    padding: 10px;
-    border: 2px solid #ddd;
+.input-group input,
+input[type="text"],
+input[type="date"] {
+    padding: 10px 12px;
+    background: var(--mk-bg);
+    border: 1px solid var(--mk-border);
     border-radius: 5px;
-    font-size: 16px;
-    transition: border-color 0.3s;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--mk-fg);
+    transition: border-color 0.2s;
 }
 
-.input-group input:focus {
+.input-group input::placeholder {
+    color: var(--mk-comment);
+}
+
+.input-group input:focus,
+input[type="text"]:focus,
+input[type="date"]:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: var(--mk-green);
+}
+
+/* 날짜 입력 아이콘을 밝게 */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+    cursor: pointer;
 }
 
 .btn {
-    background: #4CAF50;
-    color: white;
+    background: var(--btn-primary);
+    color: var(--mk-fg);
     border: none;
-    padding: 12px 24px;
+    padding: 11px 22px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background 0.3s;
+    font-size: 15px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
 .btn:hover {
-    background: #45a049;
+    background: var(--btn-primary-hover);
+}
+
+.btn-add {
+    background: var(--btn-add);
+    color: var(--mk-fg);
+}
+.btn-add:hover {
+    background: var(--btn-add-hover);
+}
+.btn-danger {
+    background: var(--btn-danger);
+    color: var(--mk-fg);
+}
+.btn-danger:hover {
+    background: var(--btn-danger-hover);
+}
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+}
+.btn-icon {
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 700;
 }
 
 .content-area {
-    background: #f9f9f9;
-    border-radius: 10px;
+    background: var(--mk-bg);
+    border: 1px solid var(--mk-border);
+    border-radius: 8px;
     padding: 20px;
     min-height: 200px;
 }
 
+/* =========================================================
+   채널 목록
+   ========================================================= */
 .channel-item {
-    background: white;
+    background: var(--mk-bg-alt);
     padding: 15px;
     margin: 10px 0;
-    border-radius: 8px;
-    border-left: 4px solid #4CAF50;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 6px;
+    border-left: 4px solid var(--mk-green);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .channel-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    border-left-color: #2196F3;
+    background: var(--mk-bg-soft);
+    border-left-color: var(--mk-cyan);
+    transform: translateX(3px);
 }
 
 .channel-item.hidden {
@@ -142,93 +260,514 @@ header h1 {
 }
 
 .channel-item h3 {
-    color: #333;
+    color: var(--mk-fg);
     margin-bottom: 5px;
 }
 
 .channel-item .channel-info {
-    color: #666;
+    color: var(--mk-fg-dim);
     font-size: 14px;
 }
+.channel-item .channel-info strong {
+    color: var(--mk-orange);
+}
 
+/* =========================================================
+   편성표 아이템 (리스트형)
+   ========================================================= */
 .schedule-item {
-    background: white;
-    padding: 20px;
-    margin: 15px 0;
-    border-radius: 10px;
-    border-left: 5px solid #2196F3;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    background: var(--mk-bg-alt);
+    padding: 18px 20px;
+    margin: 14px 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--mk-cyan);
     transition: transform 0.2s;
 }
 
 .schedule-item:hover {
-    transform: translateY(-2px);
+    transform: translateX(3px);
 }
 
 .schedule-time {
-    font-size: 18px;
-    font-weight: bold;
-    color: #2196F3;
-    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--mk-cyan);
+    margin-bottom: 8px;
 }
 
 .program-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--mk-fg);
     margin-bottom: 8px;
 }
 
 .program-genre {
     display: inline-block;
-    background: #FF9800;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 15px;
+    background: var(--mk-orange);
+    color: var(--mk-bg);
+    padding: 3px 12px;
+    border-radius: 12px;
     font-size: 12px;
+    font-weight: 600;
     margin-bottom: 10px;
 }
 
 .program-description {
-    color: #666;
-    line-height: 1.5;
+    color: var(--mk-fg-dim);
+    line-height: 1.6;
     margin-top: 10px;
 }
 
+/* =========================================================
+   상태 메시지
+   ========================================================= */
 .loading {
     text-align: center;
-    color: #666;
+    color: var(--mk-yellow);
     font-style: italic;
     padding: 40px;
 }
 
 .error {
-    background: #ffebee;
-    color: #c62828;
-    padding: 15px;
+    background: rgba(249,38,114,0.12);
+    color: var(--mk-pink);
+    padding: 14px 16px;
     border-radius: 5px;
-    border-left: 4px solid #c62828;
+    border-left: 4px solid var(--mk-pink);
     margin: 10px 0;
 }
 
 .empty {
     text-align: center;
-    color: #999;
+    color: var(--mk-comment);
     padding: 40px;
     font-style: italic;
 }
+.empty strong {
+    color: var(--mk-fg-dim);
+}
 
+/* =========================================================
+   채널 선택기 (자동완성)
+   ========================================================= */
+.channel-picker {
+    position: relative;
+    display: inline-block;
+}
+.channel-picker input {
+    min-width: 260px;
+}
+.channel-options {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--mk-bg-alt);
+    border: 1px solid var(--mk-green);
+    border-radius: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.channel-options.open {
+    display: block;
+}
+.channel-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--mk-fg);
+    border-bottom: 1px solid var(--mk-border);
+}
+.channel-option:last-child {
+    border-bottom: none;
+}
+.channel-option:hover {
+    background: var(--mk-bg-soft);
+    color: var(--mk-green);
+}
+.channel-option-id {
+    color: var(--mk-comment);
+    font-size: 13px;
+}
+.channel-option.empty-option {
+    color: var(--mk-comment);
+    cursor: default;
+    font-style: italic;
+}
+.channel-option.empty-option:hover {
+    background: var(--mk-bg-alt);
+    color: var(--mk-comment);
+}
+
+/* =========================================================
+   공용 테이블 (즐겨찾기 편집 / 현재·다음 방송)
+   ========================================================= */
+.fav-table,
+.cn-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--mk-bg-alt);
+    border: 1px solid var(--mk-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.fav-table th,
+.fav-table td,
+.cn-table th,
+.cn-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--mk-border);
+    color: var(--mk-fg);
+}
+.cn-table td {
+    vertical-align: top;
+}
+.fav-table th,
+.cn-table th {
+    background: var(--mk-bg);
+    color: var(--mk-green);
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 2px solid var(--mk-border);
+}
+.fav-table tbody tr:hover,
+.cn-table tbody tr:hover {
+    background: var(--mk-bg-soft);
+}
+.fav-table tbody tr:last-child td,
+.cn-table tbody tr:last-child td {
+    border-bottom: none;
+}
+.fav-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--mk-green);
+}
+.group-badge {
+    display: inline-block;
+    background: var(--mk-purple);
+    color: var(--mk-bg);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   채널 검색 모달
+   ========================================================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: flex-start;
+}
+.modal-overlay.open {
+    display: flex;
+}
+.modal {
+    background: var(--mk-bg-alt);
+    border: 1px solid var(--mk-border);
+    width: 90%;
+    max-width: 520px;
+    margin-top: 80px;
+    border-radius: 10px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+    overflow: hidden;
+    animation: modalIn 0.2s ease;
+}
+@keyframes modalIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--mk-bg);
+    color: var(--mk-green);
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--mk-border);
+}
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.15em;
+}
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--mk-pink);
+    font-size: 18px;
+    cursor: pointer;
+}
+.modal-body {
+    padding: 20px;
+}
+.modal-status {
+    margin-top: 10px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    min-height: 0;
+    transition: all 0.15s;
+}
+.modal-status.status-ok,
+.modal-status.status-warn,
+.modal-status.status-err {
+    padding: 10px 12px;
+    border-radius: 6px;
+}
+.modal-status.status-ok {
+    background: rgba(166,226,46,0.12);
+    color: var(--mk-green);
+    border-left: 3px solid var(--mk-green);
+}
+.modal-status.status-warn {
+    background: rgba(230,219,116,0.14);
+    color: var(--mk-yellow);
+    border-left: 3px solid var(--mk-yellow);
+}
+.modal-status.status-err {
+    background: rgba(249,38,114,0.12);
+    color: var(--mk-pink);
+    border-left: 3px solid var(--mk-pink);
+}
+.modal-results {
+    max-height: 360px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: var(--mk-bg);
+    border: 1px solid var(--mk-border);
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+.search-result-item:hover {
+    background: var(--mk-bg-soft);
+    border-color: var(--mk-green);
+}
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+}
+.search-result-info strong {
+    color: var(--mk-fg);
+}
+.search-result-sub {
+    color: var(--mk-comment);
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+/* =========================================================
+   사용자 TV 편성표 그리드
+   ========================================================= */
+.guide-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--mk-border);
+    border-radius: 8px;
+    background: var(--mk-bg);
+}
+.guide-grid {
+    display: inline-block;
+    min-width: 100%;
+}
+.guide-header-row,
+.guide-row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid var(--mk-border);
+}
+.guide-row:last-child {
+    border-bottom: none;
+}
+.guide-channel-label {
+    flex: 0 0 150px;
+    width: 150px;
+    padding: 10px 12px;
+    background: var(--mk-bg-alt);
+    border-right: 1px solid var(--mk-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: sticky;
+    left: 0;
+    z-index: 2;
+}
+.guide-channel-label strong {
+    color: var(--mk-fg);
+}
+.guide-channel-id {
+    color: var(--mk-comment);
+    font-size: 12px;
+    margin-top: 2px;
+}
+.guide-corner {
+    background: var(--mk-bg);
+    color: var(--mk-green);
+    font-weight: 700;
+}
+.guide-hours {
+    display: flex;
+    background: var(--mk-bg);
+}
+.guide-hour {
+    flex: 0 0 auto;
+    color: var(--mk-cyan);
+    font-size: 12px;
+    padding: 10px 0 10px 4px;
+    text-align: left;
+    border-left: 1px solid var(--mk-border);
+    box-sizing: border-box;
+}
+.guide-track {
+    position: relative;
+    height: 60px;
+    background-image: repeating-linear-gradient(
+        to right,
+        var(--mk-bg) 0px,
+        var(--mk-bg) 119px,
+        var(--mk-border) 119px,
+        var(--mk-border) 120px
+    );
+}
+.guide-program {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    background: var(--mk-green);
+    color: var(--mk-bg);
+    border-radius: 5px;
+    padding: 4px 8px;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid rgba(0,0,0,0.25);
+    cursor: default;
+}
+.guide-program:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 0 10px rgba(166,226,46,0.4);
+    z-index: 3;
+}
+.guide-program-title {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.guide-program-time {
+    font-size: 11px;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   현재 / 다음 방송
+   ========================================================= */
+.cn-header {
+    margin-bottom: 16px;
+    color: var(--mk-fg-dim);
+    font-size: 14px;
+}
+.cn-header strong {
+    color: var(--mk-yellow);
+}
+.cn-table th:nth-child(3) {
+    color: var(--mk-green);
+}
+.cn-table th:nth-child(4) {
+    color: var(--mk-orange);
+}
+.cn-td-channel {
+    font-weight: 700;
+    color: var(--mk-fg);
+    white-space: nowrap;
+}
+.cn-td-current {
+    border-left: 3px solid var(--mk-green);
+}
+.cn-td-next {
+    border-left: 3px solid var(--mk-orange);
+}
+.cn-cell-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--mk-fg);
+    margin-bottom: 4px;
+}
+.cn-cell-time {
+    font-size: 13px;
+    color: var(--mk-cyan);
+    font-weight: 600;
+}
+.cn-cell-genre {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--mk-comment);
+}
+.cn-empty {
+    color: var(--mk-comment);
+    font-style: italic;
+    font-size: 14px;
+}
+
+/* =========================================================
+   반응형
+   ========================================================= */
 @media (max-width: 768px) {
     .input-group {
         flex-direction: column;
         align-items: stretch;
     }
-    
-    .tabs {
+    .layout {
         flex-direction: column;
     }
-    
+    .sidebar {
+        flex: 0 0 auto;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: none;
+        border-bottom: 1px solid var(--mk-border);
+        padding: 8px;
+        gap: 4px;
+    }
+    .nav-btn {
+        width: auto;
+        flex: 1 1 auto;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        justify-content: center;
+        padding: 10px 12px;
+    }
+    .nav-btn.active {
+        border-left-color: transparent;
+        border-bottom-color: var(--mk-green);
+    }
     .tab-content {
         padding: 20px;
+    }
+    .channel-picker,
+    .channel-picker input {
+        width: 100%;
+        min-width: 0;
     }
 }

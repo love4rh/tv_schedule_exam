@@ -34,6 +34,14 @@ public class ChannelService {
         return channelRepository.findByChannelGroup(channelGroup);
     }
 
+    public List<Channel> search(String keyword) {
+        return channelRepository.search(keyword);
+    }
+
+    public List<Channel> searchByNameOrGroup(String keyword) {
+        return channelRepository.searchByNameOrGroup(keyword);
+    }
+
     public boolean existsById(String channelId) {
         return channelRepository.existsById(channelId);
     }

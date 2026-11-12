@@ -1,5 +1,6 @@
 package com.example.tvschedule.repository;
 
+import com.example.tvschedule.dto.FavoriteChannelDto;
 import com.example.tvschedule.entity.FavoriteChannel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,6 +33,28 @@ public class FavoriteChannelRepository {
     public List<FavoriteChannel> findByUserId(String userId) {
         String sql = "SELECT id, user_id, channel_id, added_at FROM favorite_channels WHERE user_id = ?";
         return jdbcTemplate.query(sql, favoriteChannelRowMapper, userId);
+    }
+
+    private final RowMapper<FavoriteChannelDto> favoriteChannelDtoRowMapper = new RowMapper<FavoriteChannelDto>() {
+        @Override
+        public FavoriteChannelDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+            return new FavoriteChannelDto(
+                rs.getLong("id"),
+                rs.getString("channel_id"),
+                rs.getString("channel_name"),
+                rs.getString("channel_group"),
+                rs.getTimestamp("added_at").toLocalDateTime()
+            );
+        }
+    };
+
+    public List<FavoriteChannelDto> findByUserIdWithDetails(String userId) {
+        String sql = "SELECT fc.id, fc.channel_id, c.channel_name, c.channel_group, fc.added_at " +
+                    "FROM favorite_channels fc " +
+                    "INNER JOIN Channel c ON fc.channel_id = c.channel_id " +
+                    "WHERE fc.user_id = ? " +
+                    "ORDER BY fc.added_at";
+        return jdbcTemplate.query(sql, favoriteChannelDtoRowMapper, userId);
     }
 
     public Optional<FavoriteChannel> findByUserIdAndChannelId(String userId, String channelId) {

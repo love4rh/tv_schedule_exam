@@ -12,12 +12,17 @@
             <h1>📺 TV Schedule Viewer</h1>
         </header>
 
-        <nav class="tabs">
-            <button class="tab-btn active" onclick="showTab('channels')">채널 목록</button>
-            <button class="tab-btn" onclick="showTab('schedule')">채널 편성표</button>
-            <button class="tab-btn" onclick="showTab('date-schedule')">날짜별 편성표</button>
-        </nav>
+        <div class="layout">
+            <nav class="sidebar">
+                <button class="nav-btn active" onclick="showTab('channels', this)"><span class="nav-icon">📋</span> 채널 목록</button>
+                <button class="nav-btn" onclick="showTab('schedule', this)"><span class="nav-icon">📅</span> 채널 편성표</button>
+                <button class="nav-btn" onclick="showTab('date-schedule', this)"><span class="nav-icon">📆</span> 날짜별 편성표</button>
+                <button class="nav-btn" onclick="showTab('favorites', this)"><span class="nav-icon">⭐</span> 즐겨찾기 편집</button>
+                <button class="nav-btn" onclick="showTab('user-guide', this)"><span class="nav-icon">🗓️</span> 사용자 편성표</button>
+                <button class="nav-btn" onclick="showTab('current-next', this)"><span class="nav-icon">⏱️</span> 현재/다음 방송</button>
+            </nav>
 
+            <main class="main-content">
         <!-- 채널 목록 탭 -->
         <div id="channels" class="tab-content active">
             <h2>📋 채널 목록</h2>
@@ -33,10 +38,15 @@
         <div id="schedule" class="tab-content">
             <h2>📅 채널 편성표</h2>
             <div class="input-group">
-                <label for="channelId">채널 ID:</label>
-                <input type="text" id="channelId" placeholder="예: KBS1" value="KBS1">
+                <label for="channelNameSearch">채널명:</label>
+                <div class="channel-picker">
+                    <input type="text" id="channelNameSearch" autocomplete="off" placeholder="채널명 입력 (예: KBS)"
+                           oninput="onChannelPickerInput('schedule')">
+                    <div id="channelOptions" class="channel-options"></div>
+                </div>
                 <button onclick="loadSchedule()" class="btn">편성표 조회</button>
             </div>
+            <input type="hidden" id="channelId">
             <div id="schedule-list" class="content-area"></div>
         </div>
 
@@ -44,13 +54,81 @@
         <div id="date-schedule" class="tab-content">
             <h2>📆 날짜별 편성표</h2>
             <div class="input-group">
-                <label for="dateChannelId">채널 ID:</label>
-                <input type="text" id="dateChannelId" placeholder="예: KBS1" value="KBS1">
+                <label for="dateChannelNameSearch">채널명:</label>
+                <div class="channel-picker">
+                    <input type="text" id="dateChannelNameSearch" autocomplete="off" placeholder="채널명 입력 (예: KBS)"
+                           oninput="onChannelPickerInput('date-schedule')">
+                    <div id="dateChannelOptions" class="channel-options"></div>
+                </div>
                 <label for="scheduleDate">날짜:</label>
                 <input type="date" id="scheduleDate">
+                <button type="button" class="btn btn-icon" onclick="shiftDate('scheduleDate', -1, loadDateSchedule)" title="하루 앞">◀</button>
+                <button type="button" class="btn btn-icon" onclick="shiftDate('scheduleDate', 1, loadDateSchedule)" title="하루 뒤">▶</button>
                 <button onclick="loadDateSchedule()" class="btn">편성표 조회</button>
             </div>
+            <input type="hidden" id="dateChannelId">
             <div id="date-schedule-list" class="content-area"></div>
+        </div>
+
+        <!-- 즐겨찾기 편집 탭 -->
+        <div id="favorites" class="tab-content">
+            <h2>⭐ 즐겨찾기 채널 편집</h2>
+            <div class="input-group">
+                <label for="favUserId">사용자 ID:</label>
+                <input type="text" id="favUserId" placeholder="사용자 ID 입력">
+                <button onclick="loadFavorites()" class="btn">확인</button>
+            </div>
+            <div class="input-group" id="favActions" style="display:none;">
+                <button onclick="openChannelSearchModal()" class="btn btn-add">➕ 채널 추가</button>
+                <button onclick="deleteSelectedFavorites()" class="btn btn-danger">🗑️ 선택 삭제</button>
+            </div>
+            <div id="favorites-list" class="content-area"></div>
+        </div>
+
+        <!-- 사용자 TV 편성표 탭 -->
+        <div id="user-guide" class="tab-content">
+            <h2>🗓️ 사용자 TV 편성표</h2>
+            <div class="input-group">
+                <label for="guideUserId">사용자 ID:</label>
+                <input type="text" id="guideUserId" placeholder="사용자 ID 입력">
+                <label for="guideDate">날짜:</label>
+                <input type="date" id="guideDate">
+                <button type="button" class="btn btn-icon" onclick="shiftDate('guideDate', -1, loadUserGuide)" title="하루 앞">◀</button>
+                <button type="button" class="btn btn-icon" onclick="shiftDate('guideDate', 1, loadUserGuide)" title="하루 뒤">▶</button>
+                <button onclick="loadUserGuide()" class="btn">편성표 조회</button>
+            </div>
+            <div id="user-guide-view" class="content-area"></div>
+        </div>
+
+        <!-- 현재/다음 방송 탭 -->
+        <div id="current-next" class="tab-content">
+            <h2>⏱️ 현재/다음 방송</h2>
+            <div class="input-group">
+                <label for="cnUserId">사용자 ID:</label>
+                <input type="text" id="cnUserId" placeholder="사용자 ID 입력">
+                <button onclick="loadCurrentNext()" class="btn">조회</button>
+            </div>
+            <div id="current-next-view" class="content-area"></div>
+        </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 채널 검색 팝업 (즐겨찾기 추가용) -->
+    <div id="channelSearchModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>🔍 채널 검색 후 추가</h3>
+                <button class="modal-close" onclick="closeChannelSearchModal()">✖</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="channelSearchKeyword" placeholder="채널명, 그룹명 또는 ID로 검색..." onkeyup="handleChannelSearchKeyup(event)">
+                    <button onclick="searchChannelsForAdd()" class="btn">검색</button>
+                </div>
+                <div id="channelAddStatus" class="modal-status"></div>
+                <div id="channelSearchResults" class="modal-results"></div>
+            </div>
         </div>
     </div>
 

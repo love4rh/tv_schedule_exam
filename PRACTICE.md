@@ -1,174 +1,279 @@
-# TV Schedule REST API 실습 가이드
+# TV Schedule 서버 API 실습 문제집
 
-## 실습 목표
-Spring Boot에서 REST API Controller를 직접 구현하며 다음 개념을 익힙니다:
-- HTTP Method와 Spring 어노테이션 매핑 (`@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`)
-- 경로 변수(`@PathVariable`)와 쿼리 파라미터(`@RequestParam`)
-- HTTP 상태 코드 (200, 201, 404, 409)
-- 응답 객체(`ResponseEntity`) 구성
+Spring Boot 기반 TV 편성표 서버 API를 직접 구현해 보는 실습입니다.
+각 문항은 실제 동작 중인 서버 코드의 일부를 **빈칸으로 비워 둔 것**이며, 여러분이 채워 넣어
+완성하면 됩니다.
 
-## 사전 준비
-- 프로젝트 빌드: `mvn clean compile`
-- 서버 실행: `mvn spring-boot:run`
-- 테스트 도구: Postman 또는 cURL
+## 실습 방법
 
----
+1. 실습용 파일은 다음과 같습니다.
+   ```
+   com/example/tvschedule/
+   ├── controller/ChannelController.java          (Q1, Q3)
+   ├── controller/FavoriteChannelController.java  (Q2, Q8)
+   ├── controller/ScheduleController.java         (Q4, Q5)
+   └── repository/ScheduleRepository.java         (Q6, Q7, Q9)
+   ```
+2. 코드에서 아래 마킹을 찾으면 그 자리가 빈칸입니다.
+   - 설명 주석:  `▶▶▶ __BLANK_Q#__ ◀◀◀`
+   - 채울 위치:  `/*__BLANK_Q#__*/`
+3. 문항 설명(아래)과 **API 명세서(`API_SPEC.md`)**, **DB 스키마(`tv_schedule_erd.sql`)**를 참고하여 빈칸을 채웁니다.
+4. 완성한 파일로 원본(`src/main/java/...`의 같은 이름 파일)을 교체한 뒤 빌드/실행하여 동작을 확인합니다.
+   ```bash
+   mvn clean compile
+   mvn spring-boot:run
+   ```
+5. 막히면 숙달된 조교에게 문의하세요.
 
-## 실습 1: PracChannelController.java
+## 공통 배경 지식
 
-> 파일 위치: `src/main/java/com/example/tvschedule/controller/PracChannelController.java`
+- 모든 응답은 `ApiResponse<T>` 래퍼로 감싸집니다.
+- 컨트롤러 클래스에는 공통 경로가 `@RequestMapping` 으로 선언되어 있고, 각 메서드의 매핑 경로는 그 뒤에 이어 붙습니다.
+- 자주 쓰는 Spring Web 애노테이션:
+  - `@GetMapping("경로")` : HTTP GET 매핑
+  - `@PathVariable` : 경로 변수(`{...}`) 바인딩
+  - `@RequestParam` : 쿼리 파라미터 바인딩 (옵션: `required`, `defaultValue`)
+- DB 접근은 `JdbcTemplate` + SQL 문자열로 수행합니다. 파라미터는 `?` 플레이스홀더로 바인딩합니다.
 
-완성된 `ChannelController.java`를 참고하여 TODO를 채워주세요.
+### DB 스키마 요약 (`tv_schedule_erd.sql`)
 
-### TODO 1 — API 기본 경로 설정
-`@RequestMapping`에 채널 API의 기본 경로를 작성하세요.
+| 테이블 | 주요 컬럼 |
+|--------|-----------|
+| `Channel` | `channel_id`, `channel_name`, `channel_group` |
+| `Program` | `program_id`, `title`, `genre`, `rating`, `summary`, `score` |
+| `Schedule` | `schedule_id`, `channel_id`, `program_id`, `start_time`, `end_time`, `seq_num` |
+| `favorite_channels` | `id`, `user_id`, `channel_id`, `added_at` |
 
-**힌트**: README의 "채널 관리" 섹션에서 URL 패턴을 확인하세요.
+> `Schedule.seq_num` : 채널별 방송 순번(1, 2, 3 …). `start_time` 순서와 일치하며 연속적입니다.
+> 따라서 "현재 방송"의 `seq_num` 에 1을 더하면 "다음 방송"이 됩니다.
 
----
+## 문항 요약 (총 9문제)
 
-### TODO 2 — 전체 목록 조회 어노테이션
-전체 채널 목록을 조회하는 HTTP Method 어노테이션을 작성하세요.
-
-**힌트**: 데이터를 "가져오는" 행위에 해당하는 HTTP Method는?
-
----
-
-### TODO 3 — 생성 어노테이션
-새로운 채널을 생성하는 HTTP Method 어노테이션을 작성하세요.
-
-**힌트**: 새로운 리소스를 "만드는" 행위에 해당하는 HTTP Method는?
-
----
-
-### TODO 4 — 삭제 어노테이션 (경로 포함)
-채널을 삭제하는 HTTP Method 어노테이션을 작성하세요. 경로에 `channelId`를 포함해야 합니다.
-
-**힌트**: `@XxxMapping("/{변수명}")` 형태로 작성합니다.
-
----
-
-### TODO 5 — 경로 변수 어노테이션
-URL 경로에서 `channelId` 값을 받아오는 파라미터 어노테이션을 작성하세요.
-
-**힌트**: `/api/v1/channels/9` 요청 시 `9`을 변수로 받으려면?
-
----
-
-### TODO 6 — 쿼리 파라미터 어노테이션
-`date` 파라미터를 선택적(필수 아님)으로 받는 어노테이션을 작성하세요.
-
-**힌트**: `?date=2026-05-11`처럼 전달되는 값을 받으며, 필수가 아닌 경우 `required = false` 옵션을 사용합니다.
-
----
-
-### TODO 7 — 수정 경로 작성
-특정 채널을 수정하기 위한 경로를 작성하세요.
-
-**힌트**: `@PathVariable String channelId`와 매핑되는 경로입니다.
+| 문항 | 주제 | 유형 | 난이도 |
+|------|------|------|--------|
+| Q1 | 채널 검색 | 경로 매핑 + RequestParam(필수/기본값) | ★ |
+| Q2 | 즐겨찾기 상세 조회 | 경로 매핑 + PathVariable | ★ |
+| Q3 | 채널별 편성표 | PathVariable + 선택 RequestParam | ★★ |
+| Q4 | 사용자 편성표 범위 조회 | 경로 + 다중 RequestParam | ★★ |
+| Q5 | 현재/다음 방송 | 경로 + PathVariable | ★★ |
+| Q6 | 현재 방송 SQL | DB 쿼리 작성 (시간 조건) | ★★★ |
+| Q7 | 다음 방송 SQL | DB 쿼리 작성 (seq_num) | ★★★ |
+| Q8 | 즐겨찾기 삭제 | DELETE + 다중 PathVariable | ★★ |
+| Q9 | 사용자 편성표 범위 SQL | DB 쿼리 작성 (범위/경계 걸침) | ★★★ |
 
 ---
 
-### TODO 8 — HTTP 상태 코드
-리소스를 찾을 수 없을 때 반환해야 하는 HTTP 상태 코드를 작성하세요.
+## [Q1] 채널 검색 엔드포인트 — 경로와 파라미터 (난이도 ★)
 
-**힌트**: "Not Found"에 해당하는 숫자 코드는?
+**파일**: `practice/controller/ChannelController.java`
+
+**설명**: 채널 ID 또는 채널명(옵션으로 그룹명까지)에 검색어가 포함된 채널을 조회하는 API입니다.
+
+**요구사항**
+- 전체 경로: `GET /api/v1/channels/search` (클래스 경로 `/api/v1/channels` + `/search`)
+- 쿼리 파라미터:
+  - `keyword` : 필수 문자열
+  - `includeGroup` : 선택, 기본값 `false` (boolean)
+- 빈칸:
+  - `__BLANK_Q1_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q1_B__` : 두 파라미터 선언
+
+**힌트**
+- 특정 하위 경로 GET → `@GetMapping("/search")`
+- 선택적 파라미터는 `@RequestParam(required = false, defaultValue = "false")`.
 
 ---
 
-### 검증 방법 (Postman / cURL)
+## [Q2] 즐겨찾기 상세 목록 조회 — 경로와 PathVariable (난이도 ★)
+
+**파일**: `practice/controller/FavoriteChannelController.java`
+
+**설명**: 특정 사용자의 즐겨찾기 채널을 채널명·그룹 포함 상세(`FavoriteChannelDto`)로 조회합니다.
+
+**요구사항**
+- 전체 경로: `GET /api/v1/users/{userId}/favorite-channels/with-details`
+  (클래스 경로 `/api/v1/users/{userId}/favorite-channels` + `/with-details`)
+- Path 변수: `userId`
+- 빈칸:
+  - `__BLANK_Q2_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q2_B__` : `userId` 바인딩
+
+**힌트**
+- 클래스 경로에 이미 `{userId}` 가 포함되어 있으므로 메서드에는 `/with-details` 만 추가합니다.
+- 경로 변수 바인딩은 `@PathVariable`.
+
+
+---
+
+## [Q3] 채널별 편성표 조회 — PathVariable + 선택 RequestParam (난이도 ★★)
+
+**파일**: `practice/controller/ChannelController.java`
+
+**설명**: 특정 채널의 편성표를 조회합니다. `date` 지정 시 해당 날짜만 조회합니다.
+
+**요구사항**
+- 전체 경로: `GET /api/v1/channels/{channelId}/schedules`
+- Path 변수: `channelId`
+- 쿼리 파라미터: `date` (선택, `YYYY-MM-DD`)
+- 빈칸:
+  - `__BLANK_Q3_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q3_B__` : `channelId` 바인딩
+  - `__BLANK_Q3_C__` : `date` 바인딩(선택)
+
+**힌트**
+- 경로에 경로 변수가 들어갈 때: `@GetMapping("/{channelId}/schedules")`
+- 선택 파라미터: `@RequestParam(required = false)`
+
+
+---
+
+## [Q4] 사용자 편성표 "시각 범위" 조회 — 경로 + 다중 RequestParam (난이도 ★★)
+
+**파일**: `practice/controller/ScheduleController.java`
+
+**설명**: 사용자 즐겨찾기 채널 편성표를 `[start, end)` 시각 범위(GMT 기준)로 조회합니다.
+클라이언트가 표시용 시간대(KST 등)의 하루를 GMT 범위로 변환해 전달하는 용도입니다.
+
+**요구사항**
+- 전체 경로: `GET /api/v1/schedules/users/{userId}/schedules/with-details/range`
+- Path 변수: `userId`
+- 쿼리 파라미터: `start`(필수), `end`(필수) — ISO LocalDateTime 문자열
+- 빈칸:
+  - `__BLANK_Q4_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q4_B__` : `userId` 바인딩
+  - `__BLANK_Q4_C__` : `start` 바인딩
+  - `__BLANK_Q4_D__` : `end` 바인딩
+
+**힌트**
+- 메서드 경로는 클래스 경로(`/api/v1/schedules`) 뒤에 이어지는 부분만 적습니다.
+- 필수 쿼리 파라미터는 그냥 `@RequestParam` (기본 `required = true`).
+
+
+---
+
+## [Q5] 현재/다음 방송 조회 — 경로 + PathVariable (난이도 ★★)
+
+**파일**: `practice/controller/ScheduleController.java`
+
+**설명**: 사용자의 즐겨찾기 채널마다 현재 방송 중인 프로그램과 다음 방송 프로그램을 조회합니다.
+
+**요구사항**
+- 전체 경로: `GET /api/v1/schedules/users/{userId}/current-next`
+- Path 변수: `userId`
+- 빈칸:
+  - `__BLANK_Q5_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q5_B__` : `userId` 바인딩
+
+
+---
+
+## [Q6] "현재 방송 중" 프로그램 조회 SQL 작성 (난이도 ★★★)
+
+**파일**: `practice/repository/ScheduleRepository.java` → `findCurrentProgram(String channelId)`
+
+**설명**: 특정 채널에서 **지금 이 순간 방송 중인** 프로그램 1건을 조회하는 SQL을 작성합니다.
+
+**요구사항**
+- 파라미터(`?`)는 `channelId` 1개.
+- 방송 중 조건: `start_time <= 현재시각 AND end_time > 현재시각`
+- 테이블 조인: `Schedule s` ⨝ `Channel c` ⨝ `Program p`
+- `ScheduleDto` RowMapper 가 읽는 컬럼 별칭을 SELECT 해야 함:
+  `s.schedule_id, s.channel_id, c.channel_name, s.program_id, p.title, p.genre, p.summary, s.start_time, s.end_time`
+- `seq_num` 오름차순 정렬 후 `LIMIT 1`.
+
+**힌트**
+- MySQL 현재 시각 함수: `NOW()`
+- 조인 키: `s.channel_id = c.channel_id`, `s.program_id = p.program_id`
+
+
+---
+
+## [Q7] seq_num 으로 "다음 방송" 조회 SQL 작성 (난이도 ★★★)
+
+**파일**: `practice/repository/ScheduleRepository.java` → `findBySeqNum(String channelId, int seqNum)`
+
+**설명**: 채널과 `seq_num` 으로 특정 스케줄 1건을 조회하는 SQL을 작성합니다.
+호출부에서 (현재 방송의 `seq_num` + 1)을 넘기므로, 이 메서드가 곧 "다음 방송" 조회가 됩니다.
+
+**요구사항**
+- 파라미터(`?`)는 순서대로 `channelId`, `seqNum` (2개).
+- 조건: 해당 채널에서 `seq_num` 이 주어진 값과 일치.
+- 조인/컬럼 별칭은 Q6 과 동일 규칙.
+- `LIMIT 1`.
+
+**힌트**
+- `WHERE s.channel_id = ? AND s.seq_num = ?` — 파라미터 순서가 메서드 인자 순서와 같아야 합니다.
+
+
+---
+
+## [Q8] 즐겨찾기 삭제 엔드포인트 — DELETE + 다중 PathVariable (난이도 ★★)
+
+**파일**: `practice/controller/FavoriteChannelController.java`
+
+**설명**: 특정 사용자의 즐겨찾기에서 특정 채널을 삭제합니다.
+
+**요구사항**
+- 전체 경로: `DELETE /api/v1/users/{userId}/favorite-channels/{channelId}`
+  (클래스 경로 + `/{channelId}`)
+- Path 변수 2개: `userId`, `channelId`
+- 빈칸:
+  - `__BLANK_Q9_A__` : 메서드 매핑 애노테이션
+  - `__BLANK_Q9_B__` : `userId` 바인딩
+  - `__BLANK_Q9_C__` : `channelId` 바인딩
+
+**힌트**
+- 하위 경로 DELETE → `@DeleteMapping("/{channelId}")`
+- `{userId}` 는 클래스 경로에 이미 선언되어 있지만, 메서드에서 값을 쓰려면 `@PathVariable` 로 받아야 합니다.
+
+
+---
+
+## [Q9] 사용자 편성표 "시각 범위" 조회 SQL 작성 (난이도 ★★★)
+
+**파일**: `practice/repository/ScheduleRepository.java` → `findUserFavoriteSchedulesWithNamesByRange(...)`
+
+**설명**: 사용자의 즐겨찾기 채널 편성표를 `[start, end)` 시각 범위로 조회하는 SQL을 작성합니다.
+범위 경계를 **걸치는** 프로그램(범위 시작 전부터 시작해 범위 안까지 방송되는 등)도 포함해야 합니다.
+
+**요구사항**
+- 바인딩되는 파라미터(`?`) 순서는 `userId`, `end`, `start` (코드의 query 호출 순서와 동일).
+- 사용자의 즐겨찾기 채널만 대상: `Schedule s` ⨝ `favorite_channels fc` (`fc.user_id = ?`)
+- 범위 조건(경계 걸침 포함): `s.start_time < end AND s.end_time > start`
+- 채널명·프로그램명 포함: `Schedule` ⨝ `Channel` ⨝ `Program`, `ScheduleDto` 컬럼 별칭 유지.
+- 정렬: 채널 ID, 시작 시각 순.
+
+**힌트**
+- `WHERE fc.user_id = ? AND s.start_time < ? AND s.end_time > ?` — `?` 순서는 `userId, end, start`.
+- 조인 키: `s.channel_id = fc.channel_id`, `s.channel_id = c.channel_id`, `s.program_id = p.program_id`
+
+
+---
+
+## 동작 확인 체크리스트
+
+완성 후 서버를 실행하고 아래 요청으로 확인해 보세요. (호스트/포트는 환경에 맞게)
 
 ```bash
-# 전체 채널 조회
-curl -X GET "http://localhost:8282/api/v1/channels"
+# Q1 — 채널 검색 (그룹 포함)
+curl "http://localhost:8282/api/v1/channels/search?keyword=스포츠&includeGroup=true"
 
-# 특정 채널 조회
-curl -X GET "http://localhost:8282/api/v1/channels/9"
+# Q2 — 즐겨찾기 상세 목록
+curl "http://localhost:8282/api/v1/users/user123/favorite-channels/with-details"
 
-# 채널 생성
-curl -X POST "http://localhost:8282/api/v1/channels" \
-  -H "Content-Type: application/json" \
-  -d '{"channelId": "test", "channelName": "test_channel", "channelGroup": "음악/오락"}'
+# Q3 — 채널별 편성표 (날짜 지정)
+curl "http://localhost:8282/api/v1/channels/100/schedules?date=2026-11-19"
 
-# 채널 수정
-curl -X PUT "http://localhost:8282/api/v1/channels/test" \
-  -H "Content-Type: application/json" \
-  -d '{"channelName": "test_channel_2", "channelGroup": "스포츠/취미"}'
+# Q4, Q9 — 사용자 편성표 범위 조회 (Q4 엔드포인트 + Q9 쿼리가 함께 동작)
+curl "http://localhost:8282/api/v1/schedules/users/user123/schedules/with-details/range?start=2026-11-09T15:00:00&end=2026-11-19T15:00:00"
 
-# 채널 삭제
-curl -X DELETE "http://localhost:8282/api/v1/channels/test"
+# Q5~Q7 — 현재/다음 방송 (Q6, Q7 쿼리가 올바라야 current/next 가 채워짐)
+curl "http://localhost:8282/api/v1/schedules/users/user123/current-next"
 
-# 채널별 편성표 조회
-curl -X GET "http://localhost:8282/api/v1/channels/9/schedules?date=2026-05-11"
+# Q8 — 즐겨찾기 삭제 (먼저 추가되어 있어야 함)
+curl -X DELETE "http://localhost:8282/api/v1/users/user123/favorite-channels/100"
 ```
 
----
-
-## 실습 2: PracProgramController.java
-
-> 파일 위치: `src/main/java/com/example/tvschedule/controller/PracProgramController.java`
-
-이미 완성된 `createProgram`, `updateProgram` 메서드의 패턴을 참고하여 나머지 TODO를 구현하세요.
-
-### TODO — getAllPrograms 구현
-전체 프로그램 목록을 조회하여 반환하세요.
-
-**요구사항**:
-- `programRepository.findAll()`로 목록 조회
-- `ApiResponse.success()`로 감싸서 반환
-- 메시지: `"프로그램 목록 조회 성공"`
-
-**참고**: 같은 파일의 `createProgram` 메서드에서 `ResponseEntity`와 `ApiResponse` 사용법을 확인하세요.
-
----
-
-### TODO — getProgramById 구현
-`programId`로 특정 프로그램을 조회하세요.
-
-**요구사항**:
-- `programRepository.findById(programId)`로 조회 (반환 타입: `Optional<Program>`)
-- 존재하면: `200 OK` + `ApiResponse.success(program, "프로그램 조회 성공")`
-- 존재하지 않으면: `404` + `ApiResponse.error("PROGRAM_NOT_FOUND", "프로그램을 찾을 수 없습니다")`
-
-**참고**: 실습 1의 `getChannelById`에서 `Optional` 처리 패턴을 확인하세요.
-
----
-
-### TODO — deleteProgram 구현
-프로그램을 삭제하세요.
-
-**요구사항**:
-1. `programRepository.existsById(programId)`로 존재 여부 확인
-2. 존재하지 않으면: `404` + `ApiResponse.error("PROGRAM_NOT_FOUND", "프로그램을 찾을 수 없습니다")`
-3. 존재하면: `programRepository.deleteById(programId)` 호출 후 `200 OK` + `ApiResponse.success("SUCCESS", "프로그램이 삭제되었습니다")`
-
-**참고**: 같은 파일의 `updateProgram` 메서드에서 존재 확인 → 처리 패턴을 확인하세요.
-
----
-
-### 검증 방법 (Postman / cURL)
-
-```bash
-# 전체 프로그램 조회
-curl -X GET "http://localhost:8282/api/v1/programs"
-
-# 특정 프로그램 조회
-curl -X GET "http://localhost:8282/api/v1/programs/1"
-
-# 프로그램 생성
-curl -X POST "http://localhost:8282/api/v1/programs" \
-  -H "Content-Type: application/json" \
-  -d '{"programName": "새 프로그램", "genre": "예능", "description": "테스트 프로그램"}'
-
-# 프로그램 삭제
-curl -X DELETE "http://localhost:8282/api/v1/programs/1"
-
-# 존재하지 않는 프로그램 조회 (404 확인)
-curl -X GET "http://localhost:8282/api/v1/programs/9999"
-```
-
----
-
-## 정답 확인
-- 채널: `ChannelController.java` 참고
-- 프로그램: `ProgramController.java` 참고
+- 응답이 `"success": true` 이고 데이터가 기대한 형태로 나오면 통과입니다.
+- Q5 의 결과에서 각 채널의 `current`(현재 방송)와 `next`(다음 방송)가 올바르게 채워지는지 확인하세요.
+  (현재 방송의 `endTime` 과 다음 방송의 `startTime` 이 이어지면 정상입니다.)

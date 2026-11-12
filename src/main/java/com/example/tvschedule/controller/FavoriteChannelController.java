@@ -1,6 +1,7 @@
 package com.example.tvschedule.controller;
 
 import com.example.tvschedule.dto.ApiResponse;
+import com.example.tvschedule.dto.FavoriteChannelDto;
 import com.example.tvschedule.entity.FavoriteChannel;
 import com.example.tvschedule.repository.ChannelRepository;
 import com.example.tvschedule.repository.FavoriteChannelRepository;
@@ -12,6 +13,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/*
+ * ============================================================================
+ *  [실습용 파일]  FavoriteChannelController
+ *  - 빈칸 위치는  ▶▶▶ __BLANK_Q#__ ◀◀◀  주석으로 표시되어 있습니다.
+ *  - 문제 설명은 PRACTICE.md 를 참고하세요.
+ *  - 이 컨트롤러의 기본 경로는 /api/v1/users/{userId}/favorite-channels 입니다.
+ * ============================================================================
+ */
 @RestController
 @RequestMapping("/api/v1/users/{userId}/favorite-channels")
 @CrossOrigin(origins = "*")
@@ -29,10 +38,27 @@ public class FavoriteChannelController {
         return ResponseEntity.ok(ApiResponse.success(favorites, "즐겨찾기 채널 목록 조회 성공"));
     }
 
+    /* ======================================================================
+     * [Q2] 즐겨찾기 상세 목록 조회 엔드포인트
+     *  - HTTP GET
+     *  - 전체 경로: /api/v1/users/{userId}/favorite-channels/with-details
+     *    (클래스 @RequestMapping 뒤에 "/with-details" 가 붙는다)
+     *  - Path 변수: userId
+     *  아래 두 빈칸을 채우세요.
+     * ====================================================================== */
+    /* ▶▶▶ __BLANK_Q2_A__ : "/with-details" 경로의 GET 매핑 애노테이션 ◀◀◀ */
+    /*__BLANK_Q2_A__*/
+    public ResponseEntity<ApiResponse<List<FavoriteChannelDto>>> getFavoriteChannelsWithDetails(
+            /* ▶▶▶ __BLANK_Q2_B__ : userId 를 경로 변수로 바인딩 ◀◀◀ */
+            /*__BLANK_Q2_B__*/ String userId) {
+        List<FavoriteChannelDto> favorites = favoriteChannelRepository.findByUserIdWithDetails(userId);
+        return ResponseEntity.ok(ApiResponse.success(favorites, "즐겨찾기 채널 상세 목록 조회 성공"));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<String>> addFavoriteChannel(@PathVariable String userId, @RequestBody Map<String, String> request) {
         String channelId = request.get("channelId");
-        
+
         if (channelId == null || channelId.trim().isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("INVALID_CHANNEL_ID", "채널 ID가 필요합니다"));
@@ -55,17 +81,30 @@ public class FavoriteChannelController {
                 .body(ApiResponse.success("SUCCESS", "즐겨찾기 채널이 추가되었습니다"));
     }
 
-    @DeleteMapping("/{channelId}")
-    public ResponseEntity<ApiResponse<String>> removeFavoriteChannel(@PathVariable String userId, @PathVariable String channelId) {
+    /* ======================================================================
+     * [Q9] 즐겨찾기 삭제 엔드포인트
+     *  - HTTP DELETE
+     *  - 전체 경로: /api/v1/users/{userId}/favorite-channels/{channelId}
+     *    (클래스 경로 + "/{channelId}")
+     *  - Path 변수 2개: userId, channelId
+     *  아래 세 빈칸을 채우세요.
+     * ====================================================================== */
+    /* ▶▶▶ __BLANK_Q9_A__ : "/{channelId}" 경로의 DELETE 매핑 애노테이션 ◀◀◀ */
+    /*__BLANK_Q9_A__*/
+    public ResponseEntity<ApiResponse<String>> removeFavoriteChannel(
+            /* ▶▶▶ __BLANK_Q9_B__ : userId 경로 변수 바인딩 ◀◀◀ */
+            /*__BLANK_Q9_B__*/ String userId,
+            /* ▶▶▶ __BLANK_Q9_C__ : channelId 경로 변수 바인딩 ◀◀◀ */
+            /*__BLANK_Q9_C__*/ String channelId) {
         Optional<FavoriteChannel> favorite = favoriteChannelRepository.findByUserIdAndChannelId(userId, channelId);
-        
+
         if (!favorite.isPresent()) {
             return ResponseEntity.status(404)
                     .body(ApiResponse.error("FAVORITE_NOT_FOUND", "즐겨찾기에서 해당 채널을 찾을 수 없습니다"));
         }
 
         favoriteChannelRepository.deleteByUserIdAndChannelId(userId, channelId);
-        
+
         return ResponseEntity.ok(ApiResponse.success("SUCCESS", "즐겨찾기 채널이 삭제되었습니다"));
     }
 
@@ -73,7 +112,7 @@ public class FavoriteChannelController {
     public ResponseEntity<ApiResponse<Map<String, Long>>> getFavoriteChannelCount(@PathVariable String userId) {
         long count = favoriteChannelRepository.countByUserId(userId);
         Map<String, Long> result = Map.of("count", count);
-        
+
         return ResponseEntity.ok(ApiResponse.success(result, "즐겨찾기 채널 개수 조회 성공"));
     }
 
