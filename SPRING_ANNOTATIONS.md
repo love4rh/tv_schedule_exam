@@ -26,6 +26,9 @@ TV 편성표 REST API 프로젝트(Spring Boot 3.1, Java 21, Spring JDBC)에서 
 | | `@RequestBody` | 요청 본문(JSON) → 객체 |
 | 기타 | `@CrossOrigin` | CORS(교차 출처 요청) 허용 |
 
+> 아래 본문에는 코드에 직접 작성하지는 않지만, 위 애노테이션을 설명할 때 함께 언급되는
+> **관련(내부/상위) 애노테이션**도 별도 섹션(7장)에서 보충 설명합니다.
+
 ---
 
 ## 1. 애플리케이션 시작점
@@ -56,6 +59,36 @@ TV 편성표 REST API 프로젝트(Spring Boot 3.1, Java 21, Spring JDBC)에서 
 Spring 은 애플리케이션을 "빈(Bean)"이라는 객체들의 모음으로 관리합니다.
 아래 애노테이션이 붙은 클래스는 Spring 컨테이너가 생성·관리하는 빈이 됩니다.
 (계층을 구분하는 이름이 다를 뿐, 모두 `@Component` 의 특수화된 형태입니다.)
+
+### 잠깐 — "스테레오타입(stereotype)"이란?
+
+**한 문장 정의**: "이 클래스를 **빈으로 등록해줘**" + "이 클래스의 **역할(계층)은 이거야**"
+를 한 번에 알려 주는 표식.
+
+**사전적 의미 / 어원** (용어가 어디서 왔는지 알면 이해가 쉽습니다)
+- 그리스어 **stereo-**(στερεός, "단단한·고체의·입체의") + **-type**(τύπος, "틀·주형·활자")
+  의 합성어 → 어원 그대로는 **"단단하게 굳어진 틀"**.
+- 원래는 인쇄 용어로, 조판한 활자를 통째로 떠서 만든 **고정된 금속 인쇄판(연판)** 을 뜻했습니다.
+  같은 페이지를 반복해 찍기 위한 "고정 틀"이죠.
+- 여기서 비유가 확장되어 일상어로는 **"판에 박힌 고정관념"**, 소프트웨어에서는
+  **"미리 정해진 전형적 역할의 틀/범주"** 라는 의미로 쓰입니다.
+
+**비유로 이해하기**: 회사 **사원증**과 같습니다.
+- 모든 직원은 사원증(= `@Component`)이 있어야 사내 시스템(= Spring 컨테이너)에 등록됩니다.
+- 그런데 사원증에는 **부서명**이 찍혀 있습니다: `@RestController`(요청 창구 부서),
+  `@Service`(업무 처리 부서), `@Repository`(자료/DB 부서).
+- **셋 다 "등록된 직원"이라는 본질은 같고, 부서(역할) 이름만 다릅니다.**
+
+**핵심 3가지**
+1. **공통 효과**: 네 가지(`@Component`·`@RestController`·`@Service`·`@Repository`) 모두
+   "Spring 이 생성·관리하는 빈이 된다"는 점은 동일합니다.
+   (`@RestController`/`@Service`/`@Repository` 는 내부에 `@Component` 를 품고 있음)
+2. **차이는 '의미'**: 그런데도 나눠 쓰는 이유는, **코드만 봐도 역할(계층)이 드러나게** 하기
+   위해서입니다. 애노테이션 이름이 곧 문서 역할을 합니다.
+3. **역할별 부가 기능**: `@Repository` 는 DB 예외를 Spring 표준 예외로 변환,
+   `@RestController` 는 `@ResponseBody` 포함(JSON 직렬화) 같은 기능이 추가로 딸려옵니다.
+
+> 한 줄 요약: **스테레오타입 = "빈으로 등록" + "내 역할은 이거야" 를 한 번에 선언하는 애노테이션.**
 
 ### `@RestController`
 - **역할**: 이 클래스가 REST API 요청을 처리하는 컨트롤러임을 선언합니다.
@@ -282,26 +315,61 @@ Spring 은 애플리케이션을 "빈(Bean)"이라는 객체들의 모음으로 
 
 ---
 
-## 7. Java 표준 애노테이션
+## 7. 본문 설명에 등장하는 관련 애노테이션 (코드에는 직접 없음)
 
-### `@Override`
-- **역할**: 상위 클래스/인터페이스의 메서드를 **재정의(오버라이드)** 한다는 것을 명시합니다.
-  Spring 애노테이션은 아니지만, 이 프로젝트에서 `RowMapper` 구현 시 사용됩니다.
-  철자를 틀리면 컴파일 오류로 알려 주어 실수를 방지합니다.
-- **이 프로젝트 예시** (`ChannelRepository.java` — JDBC 결과를 객체로 매핑):
+앞선 설명에서 "~의 합성/특수화"라고 언급한 애노테이션들입니다. 이 프로젝트 소스에
+직접 작성하지는 않지만, 우리가 쓰는 애노테이션의 **내부 구성 요소**이거나 **상위 개념**이라
+이해해 두면 동작 원리가 분명해집니다.
 
-  ```java
-  private final RowMapper<Channel> channelRowMapper = new RowMapper<Channel>() {
-      @Override
-      public Channel mapRow(ResultSet rs, int rowNum) throws SQLException {
-          Channel channel = new Channel();
-          channel.setChannelId(rs.getString("channel_id"));
-          channel.setChannelName(rs.getString("channel_name"));
-          channel.setChannelGroup(rs.getString("channel_group"));
-          return channel;
-      }
-  };
-  ```
+### `@Component`
+- **역할**: Spring 이 관리하는 빈으로 등록되는 **가장 기본적인** 스테레오타입 애노테이션.
+- **관계**: `@RestController`, `@Service`, `@Repository` 는 모두 내부적으로 `@Component` 를
+  품고 있는 **특수화(구체화)** 형태입니다. 즉 세 애노테이션 중 무엇을 붙이든 "빈으로 등록"되는
+  효과는 동일하고, 계층(역할)을 이름으로 구분해 줄 뿐입니다.
+- **비고**: 이 프로젝트는 계층이 명확하므로 `@Component` 대신 역할에 맞는
+  `@Service`/`@Repository`/`@RestController` 를 사용했습니다.
+
+### `@Controller`
+- **역할**: 전통적인 Spring MVC 컨트롤러로 등록합니다. 기본적으로 메서드 반환값을
+  **뷰 이름(HTML 템플릿)** 으로 해석합니다.
+- **관계**: `@RestController` = `@Controller` + `@ResponseBody`.
+  이 프로젝트는 HTML 뷰가 아니라 JSON 데이터를 반환하므로 `@Controller` 대신
+  `@RestController` 를 사용합니다.
+
+### `@ResponseBody`
+- **역할**: 메서드 반환값을 뷰가 아니라 **HTTP 응답 본문(JSON 등)으로 직접 직렬화**합니다.
+- **관계**: `@RestController` 를 쓰면 클래스의 모든 메서드에 `@ResponseBody` 가 적용된 것과
+  같습니다. 그래서 이 프로젝트의 컨트롤러 메서드는 반환한 `ResponseEntity<ApiResponse<...>>`
+  가 자동으로 JSON 으로 변환됩니다.
+
+### `@SpringBootApplication` 을 구성하는 3종
+`@SpringBootApplication` 은 아래 세 애노테이션을 하나로 합친 것입니다(1장 참고).
+
+- **`@SpringBootConfiguration`**
+  - 이 클래스가 Spring 설정(Configuration) 클래스임을 나타냅니다.
+    (일반 Spring 의 `@Configuration` 을 Boot 전용으로 특수화한 것)
+- **`@EnableAutoConfiguration`**
+  - 클래스패스(의존성)와 설정을 보고 **필요한 빈을 자동 구성**합니다.
+    예: `spring-boot-starter-web` 이 있으면 내장 Tomcat·JSON 변환기를, JDBC 의존성과
+    `application.yml` 의 datasource 설정이 있으면 `DataSource`·`JdbcTemplate` 을 자동 구성.
+- **`@ComponentScan`**
+  - 현재 클래스가 위치한 패키지(`com.example.tvschedule`)와 그 하위를 스캔하여
+    `@Component`(및 `@Service`/`@Repository`/`@RestController`)가 붙은 클래스를 찾아
+    빈으로 등록합니다. 이 프로젝트의 모든 컨트롤러/서비스/리포지토리가 자동 등록되는 이유입니다.
+
+### HTTP 메서드 매핑 중 이 프로젝트에 없는 것
+요청 매핑(4장)에서 언급했지만 현재 교육용 범위에서는 쓰지 않는 매핑입니다.
+
+- **`@PutMapping`**: HTTP **PUT**(리소스 전체 수정) 매핑. `@RequestMapping(method = PUT)` 축약형.
+- **`@PatchMapping`**: HTTP **PATCH**(리소스 부분 수정) 매핑.
+
+> 이 프로젝트는 조회(GET)와 즐겨찾기 추가/삭제(POST/DELETE)만 제공하므로
+> `@PutMapping`/`@PatchMapping` 은 사용하지 않습니다. 생성·수정·삭제 전반이 필요할 때
+> 참고용으로 알아 두면 됩니다.
+
+> 요약: 우리가 실제로 타이핑하는 애노테이션(`@RestController`, `@Service`, `@Repository`,
+> `@SpringBootApplication`)은 위의 기본 애노테이션들을 **조합·특수화**한 "편의 애노테이션"입니다.
+> 그래서 한 줄만 붙여도 여러 동작이 한꺼번에 적용됩니다.
 
 ---
 
@@ -325,7 +393,7 @@ Spring 은 애플리케이션을 "빈(Bean)"이라는 객체들의 모음으로 
      │
      ▼
 @Autowired ChannelRepository (@Repository)             ← DB 조회 (JdbcTemplate)
-     │   RowMapper.mapRow() @Override                   ← 조회 결과 → Channel 객체
+     │                                                    조회 결과 → Channel 객체로 매핑
      ▼
 ResponseEntity<ApiResponse<List<Channel>>> 반환          ← @RestController 가 JSON 으로 직렬화
      │
