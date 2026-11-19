@@ -38,7 +38,7 @@ public class ProgramRepository {
         return jdbcTemplate.query(sql, programRowMapper);
     }
 
-    public Optional<Program> findById(Long programId) {
+    public Optional<Program> findById(String programId) {
         String sql = "SELECT program_id, title, genre, summary FROM Program WHERE program_id = ?";
         List<Program> programs = jdbcTemplate.query(sql, programRowMapper, programId);
         return programs.isEmpty() ? Optional.empty() : Optional.of(programs.get(0));
